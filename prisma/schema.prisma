@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id        String   @id @default(uuid())
+  email     String   @unique //cannot be text since it's unique
+  username  String   @unique //cannot be text since it's unique
+  password  String   @db.Text
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+
+  profile   Profile? // One-to-One relationship
+  modules   Module[] // One-to-Many relationship
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique //cannot be text since it's unique
+  firstname String   @db.Text
+  lastname  String   @db.Text
+  middlename String? @db.Text
+  bio       String? @db.Text
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
+
+  account   Account  @relation(fields: [userId], references: [id]) // Only this side has fields/references
+}
+
+model Module {
+  recID        String   @id @default(uuid())
+  accountCode  String
+  moduleCode   String   @db.Text
+  moduleDetails String  @db.Text
+  moduleDesc   String?  @db.Text
+  createdAt    DateTime @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime @default(now()) @updatedAt @db.Timestamp(0)
+
+  account      Account  @relation(fields: [accountCode], references: [id]) // 1:N relationship
+}
